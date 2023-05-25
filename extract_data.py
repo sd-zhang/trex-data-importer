@@ -11,12 +11,8 @@ def extract_energy(file_name, **kwargs):
 
         # read header
         headers = f.readline().lower().strip().rstrip('\n').replace('"','').split(',')
-        if not ('use [kw]' in headers or 'gen [kw]' in headers):
-            return
-
-        # time_col = headers.index('date & time')
-        use_col = headers.index('Equipment Electric Power [kWh]')
-        gen_col = headers.index('Solar Generation [W/kW]')
+        use_col = 7
+        gen_col = 11
 
         # starting time is August 1, 2016, 12:00 AM, phoenix time
         timestamp = 1470034800
