@@ -1,6 +1,7 @@
 # assume year is 2016, as it is the last time before 2022 with a July 31 falling on a Sunday
 # make start time August 1, 0:0:0 to conform to 0 index time (i.e, July 31, hour 24 = August 1, hour 0)
 # assume timezone is Arizona, since there is no DST
+import dataset
 
 def extract_energy(file_name, **kwargs):
     # read energy profile
