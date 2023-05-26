@@ -2,9 +2,34 @@
 # make start time August 1, 0:0:0 to conform to 0 index time (i.e, July 31, hour 24 = August 1, hour 0)
 # assume timezone is Arizona, since there is no DST
 import dataset
+import re
+
+def extract_weather(file_name, **kwargs):
+    # read energy profile
+    with open(file_name, 'r') as f:
+        # headers = []
+        data = []
+
+        # read header
+        headers = re.sub("[\(\[].*?[\)\]]", "", f.readline()).lower().strip().rstrip('\n').split(",")
+        headers = [re.sub('[^a-zA-Z0-9\n\.]', '_', x.strip()) for x in headers]
+
+        # starting time is August 1, 2016, 12:00 AM, phoenix time
+        timestamp = 1470034800
+
+        while True:
+            line = f.readline().strip().rstrip('\n').split(',')
+
+            if not line[0]:
+                break
+
+            data_row = {'time': timestamp} | dict(zip(headers, line))
+            data.append(data_row)
+
+            timestamp += 3600
+        return data
 
 def extract_energy(file_name, **kwargs):
-    # read energy profile
     with open(file_name, 'r') as f:
         # headers = []
         data = []
@@ -42,6 +67,7 @@ if __name__ == "__main__":
 
     db = dataset.connect("postgresql://postgres:postgres@localhost/citylearn")
     energy_profile = extract_energy(file_dir + profile_name + ".csv")
+    weather_profile = extract_weather(file_dir + "weather.csv")
         if energy_profile:
             if profile_name not in db.tables:
                 table = db.create_table(profile_name, primary_id='time', primary_type=db.types.integer)
@@ -49,3 +75,4 @@ if __name__ == "__main__":
                 table = db[profile_name]
 
             table.upsert_many(energy_profile, ['time'])
+            table.upsert_many(weather_profile, ['time'])
