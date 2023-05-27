@@ -19,6 +19,7 @@ def extract_weather(file_name, **kwargs):
 
         while True:
             line = f.readline().strip().rstrip('\n').split(',')
+            line = [float(x) for x in line]
 
             if not line[0]:
                 break
@@ -68,11 +69,14 @@ if __name__ == "__main__":
     db = dataset.connect("postgresql://postgres:postgres@localhost/citylearn")
     energy_profile = extract_energy(file_dir + profile_name + ".csv")
     weather_profile = extract_weather(file_dir + "weather.csv")
-        if energy_profile:
-            if profile_name not in db.tables:
-                table = db.create_table(profile_name, primary_id='time', primary_type=db.types.integer)
-            else:
-                table = db[profile_name]
 
-            table.upsert_many(energy_profile, ['time'])
-            table.upsert_many(weather_profile, ['time'])
+    for idx in range(len(energy_profile)):
+        energy_profile[idx] = energy_profile[idx] | weather_profile[idx]
+
+    if energy_profile:
+        if profile_name not in db.tables:
+            table = db.create_table(profile_name, primary_id='time', primary_type=db.types.integer)
+        else:
+            table = db[profile_name]
+
+        table.upsert_many(energy_profile, ['time'])
