@@ -16,18 +16,19 @@ def extract_weather(file_name, **kwargs):
 
         # starting time is August 1, 2016, 12:00 AM, phoenix time
         timestamp = 1470034800
+        # line_count = 0
 
         while True:
             line = f.readline().strip().rstrip('\n').split(',')
-            line = [float(x) for x in line]
-
             if not line[0]:
                 break
+            line = [float(x) for x in line]
 
             data_row = {'time': timestamp} | dict(zip(headers, line))
             data.append(data_row)
 
             timestamp += 3600
+            # line_count += 1
         return data
 
 def extract_energy(file_name, **kwargs):
